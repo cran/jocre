@@ -57,7 +57,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     }
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -179,7 +179,46 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
   
   if(method=="fixseq"){
     
-    stop("Not implemented (yet).")
+    if(p > 2){
+      stop("The fixed sequence procedure is currently only implemented for 2-dimensional data.")
+    }
+    
+    t_1st <- c(min(0, est[1] - sqrt(cov[1, 1]) * qt(1 - alpha, df) / sqrt(n)),
+               max(0, est[1] + sqrt(cov[1, 1]) * qt(1 - alpha, df) / sqrt(n)))
+    
+    t_2nd <- c(min(0, est[2] - sqrt(cov[2, 2]) * qt(1 - alpha, df) / sqrt(n)),
+               max(0, est[2] + sqrt(cov[2, 2]) * qt(1 - alpha, df) / sqrt(n)))
+    
+    if(t_1st[1] > log(0.8) & t_1st[2] < log(1.25)){
+      
+      if(t_2nd[1] > log(0.8) & t_2nd[2] < log(1.25)){
+        
+        # both bioequivalent
+        
+        ma <- max(c(max(abs(t_1st)), max(abs(t_2nd))))
+        T_1st <- T_2nd <- c(-ma, ma)
+        
+      }else{
+        
+        # only 1st bioequivalent
+        
+        T_1st <- c(log(0.8), log(1.25))
+        T_2nd <- c(min(log(0.8), t_2nd[1]), max(log(1.25), t_2nd[2]))
+        
+      }
+      
+    }else{
+      
+      # 1st not bioequivalent (thus 2nd not tested)
+      
+      T_1st <- c(min(log(0.8), t_1st[1]), max(log(1.25), t_1st[2]))
+      T_2nd <- c(NA, NA)
+      
+    }
+    
+    ciFinal <- rbind(T_1st, T_2nd)
+    
+    crFinal <- NULL
     
   }
   
@@ -191,7 +230,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     rhs <- qf(p=1 - alpha, df1=p, df2=df - p + 1) * p * df / (df - p + 1)
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -305,7 +344,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     ciFinalX <- cbind(est - searchwidth/2 * poolvar, est + searchwidth/2 * poolvar)
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -422,7 +461,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     ciFinalX <- cbind(est - searchwidth/2 * poolvar, est + searchwidth/2 * poolvar)
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -541,7 +580,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     rhs <- (p / (n - 1) * qf(p=1 - alpha, df1=p, df2=df))
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -657,7 +696,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     rhs <- (poolvar/n * p * qf(p=1 - alpha, df1=p, df2=df))
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -780,7 +819,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     ciFinalX <- cbind(est - searchwidth/2 * poolvar, est + searchwidth/2 * poolvar)
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -916,7 +955,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
     ciFinalX <- cbind(est - searchwidth/2 * poolvar, est + searchwidth/2 * poolvar)
     
     while(min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001 | 
-            min(abs(ciFinalX[, 1] - (est - searchwidth/2 * poolvar))) < 0.001){
+            min(abs(ciFinalX[, 2] - (est + searchwidth/2 * poolvar))) < 0.001){
       
       togrid <- list()
       
@@ -1049,7 +1088,7 @@ cset <- function(dat, method, alpha=0.1, steps=NULL, TsengBrownA=1, TsengBrownB=
   
   Out <- list()
   
-  if(p==2){
+  if(p==2 & is.null(crFinal)==FALSE){
     colnames(crFinal) <- c("Var1", "Var2")
     Out$cr <- rbind(ddply(crFinal, .(Var1), summarise, Var2=range(Var2)),
                     ddply(crFinal, .(Var2), summarise, Var1=range(Var1)))
